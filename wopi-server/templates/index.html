@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kairos Document Writer - WOPI + Collabora</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        header h1 {
+            color: white;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .file-upload {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .file-upload:hover {
+            border-color: #2c3e50;
+        }
+        .file-input {
+            display: none;
+        }
+        .file-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .file-label:hover {
+            background-color: #2980b9;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 5px;
+        }
+        .file-item:hover {
+            background-color: #f9f9f9;
+        }
+        .file-name {
+            flex-grow: 1;
+            margin-right: 10px;
+            word-break: break-all;
+        }
+        .file-actions {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+        .btn-warning:hover {
+            background-color: #d35400;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        .rename-form {
+            display: none;
+            margin-top: 5px;
+        }
+        .rename-form.active {
+            display: flex;
+            gap: 5px;
+        }
+        .rename-input {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .file-type-icon {
+            margin-right: 10px;
+            font-size: 1.5em;
+        }
+        .file-info {
+            display: flex;
+            align-items: center;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 10px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background-color: white;
+            border-color: #ddd;
+            border-bottom-color: white;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Kairos Document Writer</h1>
+        <div>
+            <span id="status-indicator" style="color: #2ecc71;">●</span>
+            <span id="status-text">Connecté</span>
+        </div>
+    </header>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="documents">Documents</div>
+        <div class="tab" data-tab="upload">Importer</div>
+        <div class="tab" data-tab="settings">Paramètres</div>
+    </div>
+
+    <div id="documents" class="tab-content active container">
+        <h2>Documents disponibles</h2>
+        <div class="file-list-container">
+            <ul class="file-list">
+                {% for file in files %}
+                <li class="file-item">
+                    <div class="file-info">
+                        {% set ext = file.split('.')[-1].lower() %}
+                        {% if ext in ['doc', 'docx', 'odt'] %}
+                            <span class="file-type-icon">📄</span>
+                        {% elif ext in ['xls', 'xlsx', 'ods'] %}
+                            <span class="file-type-icon">📊</span>
+                        {% elif ext in ['ppt', 'pptx', 'odp'] %}
+                            <span class="file-type-icon">📑</span>
+                        {% elif ext == 'pdf' %}
+                            <span class="file-type-icon">📕</span>
+                        {% else %}
+                            <span class="file-type-icon">📁</span>
+                        {% endif %}
+                        <span class="file-name">{{ file }}</span>
+                    </div>
+                    <div class="file-actions">
+                        <a href="/open/{{ file }}" target="_blank" class="btn btn-primary" title="Modifier">✏️ Modifier</a>
+                        <a href="/view/{{ file }}" target="_blank" class="btn btn-success" title="Visualiser">👁️ Visualiser</a>
+                        <button class="btn btn-warning rename-btn" data-file="{{ file }}" title="Renommer">🔄</button>
+                        <form action="/delete/{{ file }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger" title="Supprimer">🗑️</button>
+                        </form>
+                    </div>
+                    <div class="rename-form" id="rename-form-{{ file }}">
+                        <form action="/rename/{{ file }}" method="post" style="display:flex; gap:5px;">
+                            <input type="text" name="newname" class="rename-input" value="{{ file }}" required>
+                            <button type="submit" class="btn btn-success">✓</button>
+                            <button type="button" class="btn btn-danger cancel-rename">✗</button>
+                        </form>
+                    </div>
+                </li>
+                {% else %}
+                <li class="file-item">
+                    <div class="file-info">
+                        <span class="file-name">Aucun document disponible. Importez votre premier document!</span>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div id="upload" class="tab-content container">
+        <h2>Importer un document</h2>
+        <div class="file-upload">
+            <form action="/upload" method="post" enctype="multipart/form-data" id="upload-form">
+                <label for="file-input" class="file-label">Choisir un fichier</label>
+                <input id="file-input" class="file-input" type="file" name="file" accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.pdf,.txt,.rtf,.csv" required>
+                <p id="file-name">Aucun fichier sélectionné</p>
+                <button type="submit" class="btn btn-primary">Importer</button>
+            </form>
+        </div>
+        <div>
+            <h3>Types de fichiers supportés</h3>
+            <ul>
+                <li>Documents texte: .doc, .docx, .odt, .txt, .rtf</li>
+                <li>Feuilles de calcul: .xls, .xlsx, .ods, .csv</li>
+                <li>Présentations: .ppt, .pptx, .odp</li>
+                <li>Autres: .pdf</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="settings" class="tab-content container">
+        <h2>Paramètres</h2>
+        <div>
+            <h3>Serveur Collabora Online</h3>
+            <p>URL du serveur: <code id="collabora-url">http://localhost:9980</code></p>
+            <p>État: <span id="collabora-status">Connecté</span></p>
+        </div>
+        <div>
+            <h3>Serveur WOPI</h3>
+            <p>URL du serveur: <code id="wopi-url">http://localhost:5000</code></p>
+            <p>Répertoire des fichiers: <code>./files</code></p>
+        </div>
+        <script>
+            // Mettre à jour les URLs avec le protocole actuel
+            document.getElementById('collabora-url').textContent = `${window.location.protocol}//localhost:9980`;
+            document.getElementById('wopi-url').textContent = `${window.location.protocol}//localhost:5000`;
+        </script>
+    </div>
+
+    <footer>
+        <p>Kairos Document Writer - Intégration WOPI + Collabora Online</p>
+    </footer>
+
+    <script>
+        // Gestion des onglets
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Afficher le nom du fichier sélectionné
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Aucun fichier sélectionné';
+            document.getElementById('file-name').textContent = fileName;
+        });
+
+        // Gestion du renommage
+        document.querySelectorAll('.rename-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const fileName = this.dataset.file;
+                const form = document.getElementById(`rename-form-${fileName}`);
+                form.classList.toggle('active');
+            });
+        });
+
+        document.querySelectorAll('.cancel-rename').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.rename-form').classList.remove('active');
+            });
+        });
+
+        // Déterminer le protocole actuel
+        const currentProtocol = window.location.protocol;
+        
+        // Vérifier la connexion au serveur Collabora en utilisant le même protocole que la page courante
+        fetch(`${currentProtocol}//localhost:9980/hosting/discovery`)
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('collabora-status').textContent = 'Connecté';
+                    document.getElementById('collabora-status').style.color = '#2ecc71';
+                } else {
+                    throw new Error('Erreur de connexion');
+                }
+            })
+            .catch(error => {
+                document.getElementById('collabora-status').textContent = 'Déconnecté';
+                document.getElementById('collabora-status').style.color = '#e74c3c';
+                document.getElementById('status-indicator').style.color = '#e74c3c';
+                document.getElementById('status-text').textContent = 'Problème de connexion';
+            });
+    </script>
+</body>
+</html>
