@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>LibreOffice Online - Éditeur de documents</title>
+</head>
+<body>
+    <h1>Ouvrir un document avec LibreOffice Online</h1>
+    
+    <!-- Formulaire pour uploader un fichier -->
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept=".odt,.ods,.odp,.docx,.xlsx,.pptx">
+        <button type="submit">Ouvrir</button>
+    </form>
+
+    <!-- Intégration de LibreOffice Online -->
+    <iframe id="editorFrame" width="100%" height="600px" frameborder="0"></iframe>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert("Veuillez sélectionner un fichier !");
+                return;
+            }
+
+            // Créer un FormData pour l'envoi
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Envoyer le fichier au serveur (ex: Node.js/PHP)
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.url) {
+                    // Ouvrir le fichier dans LibreOffice Online
+                    const editorFrame = document.getElementById('editorFrame');
+                    editorFrame.src = `http://localhost:9980/loleaflet/dist/loleaflet.html?file_path=${encodeURIComponent(data.url)}`;
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+        });
+    </script>
+</body>
+</html>

@@ -1,37 +1,44 @@
 version: '3.8'
 
 services:
-  collabora:
-    image: collabora/code
-    container_name: collabora
-    restart: always
+  # LibreOffice Online (Collabora)
+  libreoffice:
+    image: libreoffice/online
+    container_name: libreoffice-online
     ports:
       - "9980:9980"
     environment:
-      - domain=localhost,wopi,127.0.0.1
-      - username=admin
-      - password=admin
-      - server_name=localhost
-      - aliasgroup1=http://localhost:9980
-      - aliasgroup2=https://localhost:9980
-      - extra_params=--o:ssl.enable=false --o:ssl.termination=true --o:net.post_allow.host[0]=localhost --o:net.post_allow.host[1]=127.0.0.1 --o:net.frame_ancestors=localhost --o:net.service_root=/ --o:net.proxy_prefix=false --o:storage.wopi.host[0]=localhost --o:storage.wopi.host[1]=wopi --o:security.enable_macros_execution=true --o:security.seccomp=false --o:ssl.enable_websocket_cert_check=false --o:ssl.websocket_cert_verification_depth=0 --o:ssl.websocket_ca_cert_path= --o:ssl.websocket_ca_cert_dir=
+      - "domain=localhost"  # Remplacez par votre domaine si en production
+      - "username=admin"    # Optionnel : utilisateur admin
+      - "password=secret"   # Optionnel : mot de passe admin
     cap_add:
       - MKNOD
+    restart: unless-stopped
 
-  wopi:
-    build: ./wopi-server
-    container_name: wopi-server
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./wopi-server/files:/app/files
-      # Montage optionnel pour les certificats SSL
-      # - ./ssl:/app/ssl
-    environment:
-      # Configuration SSL - décommenter et configurer pour activer HTTPS
-      - SSL_ENABLED=false
-      # - SSL_KEY_FILE=/app/ssl/key.pem
-      # - SSL_CRT_FILE=/app/ssl/cert.pem
-      - DISABLE_TLS_CERT_VALIDATION=true
-    depends_on:
-      - collabora
+  # Serveur Node.js pour l'interface d'upload
+  # node-app:
+  #   build: ./node-app
+  #   container_name: node-app
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./node-app:/app
+  #     - ./node-app/uploads:/app/uploads  # Stockage des fichiers uploadés
+  #   depends_on:
+  #     - libreoffice
+  #   restart: unless-stopped
+
+  # # Nginx (optionnel - pour HTTPS et reverse proxy)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: nginx-proxy
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"  # Si vous avez HTTPS
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+  #     - ./node-app:/var/www/html  # Servir les fichiers statiques
+  #     - ./certbot/conf:/etc/letsencrypt  # Si HTTPS (Let's Encrypt)
+  #   depends_on:
+  #     - node-app
+  #   restart: unless-stopped
