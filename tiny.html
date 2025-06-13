@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Éditeur TinyMCE Gratuit</title>
+
+  <!-- TinyMCE gratuit via Cloudflare -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
+
+  <!-- Mammoth.js pour importer .docx -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #editor { min-height: 400px; }
+    #importWordBtn { margin-top: 10px; padding: 8px 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<h2>📝 TinyMCE Gratuit avec Import Word</h2>
+
+<!-- Zone d'édition -->
+<textarea id="editor"></textarea>
+
+<!-- Bouton d'import DOCX -->
+<button id="importWordBtn">📄 Importer un fichier .docx</button>
+
+<script>
+tinymce.init({
+  selector: '#editor',
+  height: 500,
+  branding: false, // 🔥 Supprime "Powered by Tiny"
+  menubar: 'file edit view insert format tools table help',
+  plugins: 'lists link image code table autosave fullscreen preview ExportToDoc',
+  toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image table | code preview fullscreen ExportToDoc',
+  paste_data_images: true,
+  image_title: true,
+  automatic_uploads: true,
+  file_picker_types: 'image',
+  etd_file_name: 'tinymce-content',
+  etd_button_text: 'Export to Doc',
+  file_picker_callback: function (cb, value, meta) {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.onchange = function () {
+      const file = this.files[0];
+      const reader = new FileReader();
+      reader.onload = function () {
+        cb(reader.result, { title: file.name });
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  }
+});
+
+// Bouton pour importer un .docx avec mammoth.js
+document.getElementById('importWordBtn').addEventListener('click', function () {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.docx';
+
+    input.onchange = function (event) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        mammoth.convertToHtml({ arrayBuffer: event.target.result })
+          .then(result => {
+            tinymce.activeEditor.setContent(result.value);
+          })
+          .catch(error => {
+            alert("Erreur à l'importation du fichier Word !");
+            console.error(error);
+          });
+      };
+      reader.readAsArrayBuffer(this.files[0]);
+    };
+
+    input.click();
+  });
+</script>
+
+</body>
+</html>

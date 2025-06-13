@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éditeur de Documents - Style Office</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor5/41.4.2/ckeditor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f3f4f6;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: white;
+        }
+
+
+        .window-controls {
+            display: flex;
+            gap: 2px;
+        }
+
+        .window-btn {
+            width: 24px;
+            height: 24px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .window-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Menu principal - Style Office Ribbon */
+        .ribbon-container {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .ribbon-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 0 8px;
+            gap: 2px;
+        }
+
+        .ribbon-tab {
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            color: #495057;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .ribbon-tab:hover {
+            background: #f8f9fa;
+        }
+
+        .ribbon-tab.active {
+            color: #0078d4;
+            border-bottom-color: #0078d4;
+            background: white;
+        }
+
+        .ribbon-content {
+            display: flex;
+            padding: 8px 16px;
+            gap: 16px;
+            background: #f8f9fa;
+            min-height: 90px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .ribbon-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 4px 8px;
+            border-right: 1px solid #dee2e6;
+            min-width: 80px;
+        }
+
+        .ribbon-group:last-child {
+            border-right: none;
+        }
+
+        .ribbon-group-title {
+            font-size: 11px;
+            color: #6c757d;
+            text-align: center;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .ribbon-buttons {
+            display: flex;
+            gap: 2px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .ribbon-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 3px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .ribbon-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .ribbon-btn.active {
+            background: #0078d4;
+            color: white;
+            border-color: #0078d4;
+        }
+
+        /* Zone de document - Style Office */
+        .document-workspace {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            background: #f3f4f6;
+        }
+
+        .document-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .document-header {
+            background: white;
+            padding: 12px 16px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .document-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: #0078d4;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #106ebe;
+        }
+
+        .action-btn.secondary {
+            background: #6c757d;
+        }
+
+        .action-btn.secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Zone d'édition */
+        .editor-container {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+            background: #f3f4f6;
+        }
+
+        .editor-wrapper {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        /* Styles pour CKEditor */
+        .ck-editor__editable {
+            min-height: 297mm !important;
+            padding: 2.5cm 2cm !important;
+            font-family: 'Times New Roman', serif !important;
+            font-size: 12pt !important;
+            line-height: 1.5 !important;
+            border: none !important;
+            border-radius: 0 !important;
+        }
+
+        .ck-toolbar {
+            display: none !important;
+        }
+
+        /* Panneau latéral - Style Office */
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-left: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow: auto;
+            padding: 16px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .file-upload-area:hover {
+            border-color: #0078d4;
+            background: #e3f2fd;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #0078d4;
+            background: #e3f2fd;
+        }
+
+        .upload-icon {
+            font-size: 32px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .upload-text {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+
+        .upload-hint {
+            font-size: 11px;
+            color: #adb5bd;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Styles pour les propriétés du document */
+        .property-group {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .property-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            font-size: 12px;
+        }
+
+        .property-label {
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .property-value {
+            color: #495057;
+        }
+
+        /* Barre de statut */
+        .status-bar {
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 4px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #6c757d;
+            min-height: 24px;
+        }
+
+        .status-left, .status-right {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        /* Styles pour les éléments de forme */
+        .form-control {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0078d4;
+            box-shadow: 0 0 0 2px rgba(0,120,212,0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+            }
+            
+            .ribbon-content {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .ribbon-group {
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+                padding-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Ribbon - Style Office -->
+        <div class="ribbon-container">
+            <div class="ribbon-tabs">
+                <button class="ribbon-tab active" data-tab="accueil">Accueil</button>
+                <button class="ribbon-tab" data-tab="insertion">Insertion</button>
+                <button class="ribbon-tab" data-tab="mise-en-page">Mise en page</button>
+                <button class="ribbon-tab" data-tab="references">Références</button>
+                <button class="ribbon-tab" data-tab="revue">Révision</button>
+                <button class="ribbon-tab" data-tab="affichage">Affichage</button>
+            </div>
+            
+            <div class="ribbon-content" id="ribbonContent">
+                <!-- Contenu du ribbon Accueil -->
+                <div class="ribbon-group">
+                    <div class="ribbon-buttons">
+                        <button class="ribbon-btn" id="boldBtn">
+                            <strong>G</strong>
+                        </button>
+                        <button class="ribbon-btn" id="italicBtn">
+                            <em>I</em>
+                        </button>
+                        <button class="ribbon-btn" id="underlineBtn">
+                            <u>S</u>
+                        </button>
+                    </div>
+                    <div class="ribbon-group-title">Police</div>
+                </div>
+                
+                <div class="ribbon-group">
+                    <div class="ribbon-buttons">
+                        <button class="ribbon-btn" id="alignLeftBtn">≡</button>
+                        <button class="ribbon-btn" id="alignCenterBtn">≣</button>
+                        <button class="ribbon-btn" id="alignRightBtn">≡</button>
+                        <button class="ribbon-btn" id="justifyBtn">▦</button>
+                    </div>
+                    <div class="ribbon-group-title">Alignement</div>
+                </div>
+                
+                <div class="ribbon-group">
+                    <div class="ribbon-buttons">
+                        <button class="ribbon-btn" id="bulletListBtn">• Liste</button>
+                        <button class="ribbon-btn" id="numberListBtn">1. Liste</button>
+                    </div>
+                    <div class="ribbon-group-title">Listes</div>
+                </div>
+                
+                <div class="ribbon-group">
+                    <div class="ribbon-buttons">
+                        <button class="ribbon-btn" id="tableBtn">⊞ Tableau</button>
+                        <button class="ribbon-btn" id="imageBtn">🖼️ Image</button>
+                        <button class="ribbon-btn" id="linkBtn">🔗 Lien</button>
+                    </div>
+                    <div class="ribbon-group-title">Insertion</div>
+                </div>
+                
+                <div class="ribbon-group">
+                    <div class="ribbon-buttons">
+                        <button class="ribbon-btn" id="undoBtn">↶ Annuler</button>
+                        <button class="ribbon-btn" id="redoBtn">↷ Rétablir</button>
+                    </div>
+                    <div class="ribbon-group-title">Actions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone de travail -->
+        <div class="document-workspace">
+            <!-- Zone principale -->
+            <div class="document-container">
+                <div class="document-header">
+                    <div class="document-title" id="documentTitle">Document sans titre</div>
+                    <div class="document-actions">
+                        <button class="action-btn" id="saveBtn">💾 Enregistrer</button>
+                        <button class="action-btn secondary" id="exportBtn">📤 Exporter</button>
+                        <button class="action-btn secondary" id="printBtn">🖨️ Imprimer</button>
+                    </div>
+                </div>
+                
+                <div class="editor-container">
+                    <div class="editor-wrapper">
+                        <div id="editor"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panneau latéral -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    Propriétés du document
+                </div>
+                <div class="sidebar-content">
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-title">Importer un document</div>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">Glissez-déposez un fichier Word</div>
+                            <div class="upload-hint">ou cliquez pour parcourir</div>
+                            <input type="file" class="file-input" id="fileInput" accept=".docx,.doc">
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-title">Informations</div>
+                        <div class="property-group">
+                            <div class="property-item">
+                                <span class="property-label">Mots:</span>
+                                <span class="property-value" id="wordCount">0</span>
+                            </div>
+                            <div class="property-item">
+                                <span class="property-label">Caractères:</span>
+                                <span class="property-value" id="charCount">0</span>
+                            </div>
+                            <div class="property-item">
+                                <span class="property-label">Paragraphes:</span>
+                                <span class="property-value" id="paragraphCount">0</span>
+                            </div>
+                            <div class="property-item">
+                                <span class="property-label">Pages:</span>
+                                <span class="property-value" id="pageCount">1</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-title">Mise en forme</div>
+                        <div class="property-group">
+                            <label class="property-label">Taille de police:</label>
+                            <select class="form-control" id="fontSizeSelect">
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12" selected>12</option>
+                                <option value="14">14</option>
+                                <option value="16">16</option>
+                                <option value="18">18</option>
+                                <option value="20">20</option>
+                                <option value="24">24</option>
+                                <option value="28">28</option>
+                                <option value="36">36</option>
+                            </select>
+                            
+                            <label class="property-label">Famille de police:</label>
+                            <select class="form-control" id="fontFamilySelect">
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Arial">Arial</option>
+                                <option value="Calibri">Calibri</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Trebuchet MS">Trebuchet MS</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barre de statut -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span id="documentStatus">Prêt</span>
+                <span>Page 1 sur 1</span>
+            </div>
+            <div class="status-right">
+                <span>Zoom: <span id="zoomLevel">100%</span></span>
+                <span>Français (France)</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class OfficeStyleEditor {
+            constructor() {
+                this.editor = null;
+                this.currentDocument = null;
+                this.initializeEditor();
+                this.attachEventListeners();
+                this.setupFileUpload();
+            }
+
+            async initializeEditor() {
+                try {
+                    this.editor = await ClassicEditor.create(document.querySelector('#editor'), {
+                        toolbar: {
+                            items: [
+                                'exportPdf', 'exportWord', 'uploadImage', 'bold', 'italic', 'underline',
+                                'heading', '|',
+                                'bold', 'italic', 'strikethrough', '|',
+                                'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
+                                'alignment', '|',
+                                'numberedList', 'bulletedList', '|',
+                                'outdent', 'indent', '|',
+                                'todoList', 'link', 'blockQuote', 'insertTable', '|',
+                                'imageUpload', 'mediaEmbed', '|',
+                                'undo', 'redo', '|',
+                                'findAndReplace', 'selectAll', '|',
+                                'specialCharacters', 'horizontalLine', 'pageBreak', '|',
+                                'textPartLanguage', '|',
+                                'sourceEditing'
+                            ],
+                            shouldNotGroupWhenFull: true
+                        },
+                        language: 'fr',
+                        image: {
+                            toolbar: [
+                                'imageTextAlternative', 'imageStyle:inline', 'imageStyle:block', 'imageStyle:side'
+                            ]
+                        },
+                        table: {
+                            contentToolbar: [
+                                'tableColumn', 'tableRow', 'mergeTableCells',
+                                'tableCellProperties', 'tableProperties'
+                            ]
+                        },
+                        licenseKey: '',
+                        placeholder: 'Commencez à taper votre document ici...',
+                        fontSize: {
+                            options: [
+                                9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72
+                            ],
+                            supportAllValues: true
+                        },
+                        fontFamily: {
+                            options: [
+                                'default',
+                                'Arial, Helvetica, sans-serif',
+                                'Courier New, Courier, monospace',
+                                'Georgia, serif',
+                                'Lucida Sans Unicode, Lucida Grande, sans-serif',
+                                'Tahoma, Geneva, sans-serif',
+                                'Times New Roman, Times, serif',
+                                'Trebuchet MS, Helvetica, sans-serif',
+                                'Verdana, Geneva, sans-serif',
+                                'Calibri, sans-serif'
+                            ],
+                            supportAllValues: true
+                        },
+                        heading: {
+                            options: [
+                                { model: 'paragraph', title: 'Paragraphe', class: 'ck-heading_paragraph' },
+                                { model: 'heading1', view: 'h1', title: 'Titre 1', class: 'ck-heading_heading1' },
+                                { model: 'heading2', view: 'h2', title: 'Titre 2', class: 'ck-heading_heading2' },
+                                { model: 'heading3', view: 'h3', title: 'Titre 3', class: 'ck-heading_heading3' },
+                                { model: 'heading4', view: 'h4', title: 'Titre 4', class: 'ck-heading_heading4' },
+                                { model: 'heading5', view: 'h5', title: 'Titre 5', class: 'ck-heading_heading5' },
+                                { model: 'heading6', view: 'h6', title: 'Titre 6', class: 'ck-heading_heading6' }
+                            ]
+                        },
+                        link: {
+                            decorators: {
+                                addTargetToExternalLinks: true,
+                                defaultProtocol: 'https://',
+                                toggleDownloadable: {
+                                    mode: 'manual',
+                                    label: 'Téléchargeable',
+                                    attributes: {
+                                        download: 'file'
+                                    }
+                                }
+                            }
+                        },
+                        removePlugins: [
+                            'CKBoxImageEdit',
+                            'CKFinder',
+                            'EasyImage',
+                            'RealTimeCollaborativeComments',
+                            'RealTimeCollaborativeTrackChanges',
+                            'RealTimeCollaborativeRevisionHistory',
+                            'PresenceList',
+                            'Comments',
+                            'TrackChanges',
+                            'TrackChangesData',
+                            'RevisionHistory',
+                            'Pagination',
+                            'WProofreader',
+                            'MathType'
+                        ]
+                    });
+
+                    // Mise à jour des statistiques en temps réel
+                    this.editor.model.document.on('change:data', () => {
+                        this.updateDocumentStats();
+                    });
+
+                    // Configuration des boutons du ribbon
+                    this.setupRibbonButtons();
+                    
+                    console.log('Éditeur CKEditor initialisé avec succès');
+                } catch (error) {
+                    console.error('Erreur lors de l\'initialisation de l\'éditeur:', error);
+                }
+            }
+
+            setupRibbonButtons() {
+                // Boutons de formatage
+                document.getElementById('boldBtn').addEventListener('click', () => {
+                    this.editor.execute('bold');
+                });
+
+                document.getElementById('italicBtn').addEventListener('click', () => {
+                    this.editor.execute('italic');
+                });
+
+                // Bouton de soulignement désactivé car le plugin Underline n'est pas disponible
+                const underlineBtn = document.getElementById('underlineBtn');
+                if (underlineBtn) {
+                    underlineBtn.disabled = true;
+                    underlineBtn.title = 'Fonctionnalité non disponible';
+                    underlineBtn.classList.add('disabled');
+                }
+
+                // Boutons d'alignement
+                document.getElementById('alignLeftBtn').addEventListener('click', () => {
+                    this.editor.execute('alignment', { value: 'left' });
+                });
+
+                document.getElementById('alignCenterBtn').addEventListener('click', () => {
+                    this.editor.execute('alignment', { value: 'center' });
+                });
+
+                document.getElementById('alignRightBtn').addEventListener('click', () => {
+                    this.editor.execute('alignment', { value: 'right' });
+                });
+
+                document.getElementById('justifyBtn').addEventListener('click', () => {
+                    this.editor.execute('alignment', { value: 'justify' });
+                });
+
+                // Boutons de listes
+                document.getElementById('bulletListBtn').addEventListener('click', () => {
+                    this.editor.execute('bulletedList');
+                });
+
+                document.getElementById('numberListBtn').addEventListener('click', () => {
+                    this.editor.execute('numberedList');
+                });
+
+                // Boutons d'insertion
+                document.getElementById('tableBtn').addEventListener('click', () => {
+                    this.editor.execute('insertTable', { rows: 3, columns: 3 });
+                });
+
+                document.getElementById('linkBtn').addEventListener('click', () => {
+                    this.editor.execute('link');
+                });
+
+                // Boutons d'action
+                document.getElementById('undoBtn').addEventListener('click', () => {
+                    this.editor.execute('undo');
+                });
+
+                document.getElementById('redoBtn').addEventListener('click', () => {
+                    this.editor.execute('redo');
+                });
+            }
+
+            attachEventListeners() {
+                // Gestion des onglets du ribbon
+                document.querySelectorAll('.ribbon-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        document.querySelectorAll('.ribbon-tab').forEach(t => t.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.switchRibbonTab(e.target.dataset.tab);
+                    });
+                });
+
+                // Contrôles de police
+                document.getElementById('fontSizeSelect').addEventListener('change', (e) => {
+                    this.editor.execute('fontSize', { value: e.target.value + 'pt' });
+                });
+
+                document.getElementById('fontFamilySelect').addEventListener('change', (e) => {
+                    this.editor.execute('fontFamily', { value: e.target.value });
+                });
+
+                // Actions de document
+                document.getElementById('saveBtn').addEventListener('click', () => this.saveDocument());
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportDocument());
+                document.getElementById('printBtn').addEventListener('click', () => this.printDocument());
+            }
+
+            setupFileUpload() {
+                const fileInput = document.getElementById('fileInput');
+                const uploadArea = document.getElementById('fileUploadArea');
+
+                // Clic sur la zone d'upload
+                uploadArea.addEventListener('click', () => {
+                    fileInput.click();
+                });
+
+                // Changement de fichier
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.handleFileUpload(e.target.files[0]);
+                    }
+                });
+
+                // Drag & Drop
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    uploadArea.addEventListener(eventName, this.preventDefaults, false);
+                });
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    uploadArea.addEventListener(eventName, () => {
+                        uploadArea.classList.add('dragover');
+                    }, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    uploadArea.addEventListener(eventName, () => {
+                        uploadArea.classList.remove('dragover');
+                    }, false);
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        this.handleFileUpload(files[0]);
+                    }
+                }, false);
+            }
+
+            preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            async handleFileUpload(file) {
+                if (!file.name.toLowerCase().endsWith('.docx')) {
+                    alert('Veuillez sélectionner un fichier .docx');
+                    return;
+                }
+
+                document.getElementById('documentStatus').textContent = 'Chargement du document...';
+                
+                try {
+                    const arrayBuffer = await this.readFileAsArrayBuffer(file);
+                    const result = await mammoth.convertToHtml({ arrayBuffer });
+                    
+                    // Insérer le contenu dans l'éditeur
+                    this.editor.setData(result.value);
+                    
+                    // Mettre à jour le titre du document
+                    const fileName = file.name.replace('.docx', '');
+                    document.getElementById('documentTitle').textContent = fileName;
+                    this.currentDocument = fileName;
+                    
+                    // Mettre à jour les statistiques
+                    this.updateDocumentStats();
+                    
+                    document.getElementById('documentStatus').textContent = 'Document chargé avec succès';
+                    
+                    if (result.messages.length > 0) {
+                        console.warn('Avertissements de conversion:', result.messages);
+                    }
+                } catch (error) {
+                    console.error('Erreur lors du chargement du fichier:', error);
+                    document.getElementById('documentStatus').textContent = 'Erreur lors du chargement';
+                    alert('Erreur lors du chargement du fichier. Vérifiez qu\'il s\'agit d\'un fichier Word valide.');
+                }
+            }
+
+            readFileAsArrayBuffer(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = (e) => reject(e);
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            updateDocumentStats() {
+                const data = this.editor.getData();
+                const textOnly = data.replace(/<[^>]*>/g, '').trim();
+                
+                // Compter les mots
+                const words = textOnly.split(/\s+/).filter(word => word.length > 0);
+                document.getElementById('wordCount').textContent = words.length;
+                
+                // Compter les caractères
+                document.getElementById('charCount').textContent = textOnly.length;
+                
+                // Compter les paragraphes
+                const paragraphs = data.split(/<\/p>|<\/h[1-6]>|<\/div>/).filter(p => p.trim().length > 0);
+                document.getElementById('paragraphCount').textContent = paragraphs.length;
+                
+                // Estimation des pages (approximative)
+                const wordsPerPage = 250;
+                const estimatedPages = Math.max(1, Math.ceil(words.length / wordsPerPage));
+                document.getElementById('pageCount').textContent = estimatedPages;
+            }
+
+            switchRibbonTab(tabName) {
+                const ribbonContent = document.getElementById('ribbonContent');
+                
+                // Contenu différent selon l'onglet
+                const tabContents = {
+                    'accueil': this.getHomeRibbonContent(),
+                    'insertion': this.getInsertRibbonContent(),
+                    'mise-en-page': this.getLayoutRibbonContent(),
+                    'references': this.getReferencesRibbonContent(),
+                    'revue': this.getReviewRibbonContent(),
+                    'affichage': this.getViewRibbonContent()
+                };
+                
+                ribbonContent.innerHTML = tabContents[tabName] || tabContents['accueil'];
+                this.setupRibbonButtons();
+            }
+
+            getHomeRibbonContent() {
+                return `
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="boldBtn"><strong>G</strong></button>
+                            <button class="ribbon-btn" id="italicBtn"><em>I</em></button>
+                            <button class="ribbon-btn" id="underlineBtn"><u>S</u></button>
+                        </div>
+                        <div class="ribbon-group-title">Police</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="alignLeftBtn">≡</button>
+                            <button class="ribbon-btn" id="alignCenterBtn">≣</button>
+                            <button class="ribbon-btn" id="alignRightBtn">≡</button>
+                            <button class="ribbon-btn" id="justifyBtn">▦</button>
+                        </div>
+                        <div class="ribbon-group-title">Alignement</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="bulletListBtn">• Liste</button>
+                            <button class="ribbon-btn" id="numberListBtn">1. Liste</button>
+                        </div>
+                        <div class="ribbon-group-title">Listes</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="tableBtn">⊞ Tableau</button>
+                            <button class="ribbon-btn" id="imageBtn">🖼️ Image</button>
+                            <button class="ribbon-btn" id="linkBtn">🔗 Lien</button>
+                        </div>
+                        <div class="ribbon-group-title">Insertion</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="undoBtn">↶ Annuler</button>
+                            <button class="ribbon-btn" id="redoBtn">↷ Rétablir</button>
+                        </div>
+                        <div class="ribbon-group-title">Actions</div>
+                    </div>
+                `;
+            }
+
+            getInsertRibbonContent() {
+                return `
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="tableBtn">⊞ Tableau</button>
+                            <button class="ribbon-btn" id="imageBtn">🖼️ Image</button>
+                            <button class="ribbon-btn" id="mediaBtn">🎥 Média</button>
+                        </div>
+                        <div class="ribbon-group-title">Éléments</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="linkBtn">🔗 Lien</button>
+                            <button class="ribbon-btn" id="bookmarkBtn">🔖 Signet</button>
+                            <button class="ribbon-btn" id="crossRefBtn">📍 Référence</button>
+                        </div>
+                        <div class="ribbon-group-title">Liens</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="headerBtn">📄 En-tête</button>
+                            <button class="ribbon-btn" id="footerBtn">📝 Pied de page</button>
+                            <button class="ribbon-btn" id="pageNumberBtn">🔢 N° page</button>
+                        </div>
+                        <div class="ribbon-group-title">En-tête et pied</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="symbolBtn">Ω Symbole</button>
+                            <button class="ribbon-btn" id="equationBtn">∑ Équation</button>
+                            <button class="ribbon-btn" id="pageBreakBtn">⤶ Saut page</button>
+                        </div>
+                        <div class="ribbon-group-title">Symboles</div>
+                    </div>
+                `;
+            }
+
+            getLayoutRibbonContent() {
+                return `
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="marginsBtn">📏 Marges</button>
+                            <button class="ribbon-btn" id="orientationBtn">🔄 Orientation</button>
+                            <button class="ribbon-btn" id="sizeBtn">📄 Taille</button>
+                        </div>
+                        <div class="ribbon-group-title">Mise en page</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="columnsBtn">║ Colonnes</button>
+                            <button class="ribbon-btn" id="breakBtn">⤶ Sauts</button>
+                            <button class="ribbon-btn" id="lineNumberBtn">🔢 N° ligne</button>
+                        </div>
+                        <div class="ribbon-group-title">Disposition</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="indentBtn">⇥ Retrait</button>
+                            <button class="ribbon-btn" id="spacingBtn">⇕ Espacement</button>
+                        </div>
+                        <div class="ribbon-group-title">Paragraphe</div>
+                    </div>
+                `;
+            }
+
+            getReferencesRibbonContent() {
+                return `
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="tocBtn">📋 Table matières</button>
+                            <button class="ribbon-btn" id="footnotesBtn">¹ Notes bas page</button>
+                            <button class="ribbon-btn" id="citationBtn">📚 Citations</button>
+                        </div>
+                        <div class="ribbon-group-title">Table des matières</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="captionBtn">🏷️ Légende</button>
+                            <button class="ribbon-btn" id="indexBtn">📇 Index</button>
+                            <button class="ribbon-btn" id="bibliographyBtn">📖 Bibliographie</button>
+                        </div>
+                        <div class="ribbon-group-title">Légendes</div>
+                    </div>
+                `;
+            }
+
+            getReviewRibbonContent() {
+                return `
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="spellCheckBtn">✓ Orthographe</button>
+                            <button class="ribbon-btn" id="thesaurusBtn">📝 Synonymes</button>
+                            <button class="ribbon-btn" id="translateBtn">🌐 Traduire</button>
+                        </div>
+                        <div class="ribbon-group-title">Vérification</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="commentBtn">💬 Commentaire</button>
+                            <button class="ribbon-btn" id="trackBtn">📝 Suivi</button>
+                            <button class="ribbon-btn" id="protectBtn">🔒 Protéger</button>
+                        </div>
+                        <div class="ribbon-group-title">Suivi</div>
+                    </div>
+                `;
+            }
+
+            getViewRibbonContent() {
+                return `
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="printLayoutBtn">📄 Page</button>
+                            <button class="ribbon-btn" id="webLayoutBtn">🌐 Web</button>
+                            <button class="ribbon-btn" id="outlineBtn">📋 Plan</button>
+                        </div>
+                        <div class="ribbon-group-title">Affichages</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="rulerBtn">📏 Règle</button>
+                            <button class="ribbon-btn" id="gridlinesBtn">⊞ Quadrillage</button>
+                            <button class="ribbon-btn" id="navPaneBtn">🗂️ Navigation</button>
+                        </div>
+                        <div class="ribbon-group-title">Afficher</div>
+                    </div>
+                    <div class="ribbon-group">
+                        <div class="ribbon-buttons">
+                            <button class="ribbon-btn" id="zoomBtn">🔍 Zoom</button>
+                            <button class="ribbon-btn" id="zoom100Btn">100%</button>
+                            <button class="ribbon-btn" id="pageWidthBtn">↔️ Largeur page</button>
+                        </div>
+                        <div class="ribbon-group-title">Zoom</div>
+                    </div>
+                `;
+            }
+
+            saveDocument() {
+                const content = this.editor.getData();
+                const title = this.currentDocument || 'Document sans titre';
+                
+                // Créer un blob avec le contenu HTML
+                const blob = new Blob([content], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                
+                // Créer un lien de téléchargement
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${title}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                document.getElementById('documentStatus').textContent = 'Document sauvegardé';
+            }
+
+            exportDocument() {
+                const content = this.editor.getData();
+                const title = this.currentDocument || 'Document sans titre';
+                
+                // Créer le HTML complet pour l'export
+                const fullHtml = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <style>
+        body { 
+            font-family: 'Times New Roman', serif; 
+            line-height: 1.6; 
+            margin: 2.5cm;
+            font-size: 12pt;
+        }
+        h1, h2, h3, h4, h5, h6 { 
+            color: #000; 
+            margin: 20px 0 10px 0; 
+        }
+        p { 
+            margin: 10px 0; 
+            text-align: justify; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 15px 0; 
+        }
+        table td, table th { 
+            border: 1px solid #000; 
+            padding: 8px; 
+            text-align: left; 
+        }
+        img { 
+            max-width: 100%; 
+            height: auto; 
+        }
+    </style>
+</head>
+<body>
+    ${content}
+</body>
+</html>`;
+                
+                const blob = new Blob([fullHtml], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${title}_export.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                document.getElementById('documentStatus').textContent = 'Document exporté';
+            }
+
+            printDocument() {
+                const content = this.editor.getData();
+                const title = this.currentDocument || 'Document sans titre';
+                
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${title} - Impression</title>
+    <style>
+        body { 
+            font-family: 'Times New Roman', serif; 
+            line-height: 1.6; 
+            margin: 2cm;
+            font-size: 12pt;
+        }
+        h1, h2, h3, h4, h5, h6 { 
+            color: #000; 
+            margin: 20px 0 10px 0; 
+        }
+        p { 
+            margin: 10px 0; 
+            text-align: justify; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 15px 0; 
+        }
+        table td, table th { 
+            border: 1px solid #000; 
+            padding: 8px; 
+            text-align: left; 
+        }
+        img { 
+            max-width: 100%; 
+            height: auto; 
+        }
+        @media print {
+            body { margin: 0; }
+            @page { margin: 2cm; }
+        }
+    </style>
+</head>
+<body>
+    ${content}
+</body>
+</html>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+            }
+        }
+
+        // Initialisation de l'application
+        document.addEventListener('DOMContentLoaded', () => {
+            new OfficeStyleEditor();
+        });
+    </script>
+</body>
+</html>

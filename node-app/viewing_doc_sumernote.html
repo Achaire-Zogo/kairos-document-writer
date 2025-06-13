@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éditeur de Texte - Style Word</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Summernote CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs5.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .editor-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+        
+        .editor-header {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3c72 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .editor-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .file-upload-section {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+        
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #2c5aa0;
+            background: #f8f9fa;
+        }
+        
+        .upload-area.dragover {
+            border-color: #2c5aa0;
+            background: #e3f2fd;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        
+        .editor-content {
+            padding: 20px;
+        }
+        
+        .note-editor {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+        
+        .note-toolbar {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 8px 12px;
+        }
+        
+        .note-btn-group {
+            margin-right: 8px;
+        }
+        
+        .note-btn {
+            border: 1px solid #dee2e6;
+            background: white;
+            color: #495057;
+            margin: 1px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .note-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+        
+        .note-btn.active {
+            background: #2c5aa0;
+            border-color: #2c5aa0;
+            color: white;
+        }
+        
+        .note-editable {
+            padding: 20px;
+            min-height: 500px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        .document-actions {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .btn-primary {
+            background: #2c5aa0;
+            border-color: #2c5aa0;
+        }
+        
+        .btn-primary:hover {
+            background: #1e3c72;
+            border-color: #1e3c72;
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+        }
+        
+        .word-count {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="editor-container">
+            <!-- Header -->
+            <div class="editor-header">
+                <h1 class="editor-title">
+                    <i class="fas fa-file-word me-2"></i>
+                    Éditeur de Documents
+                </h1>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span>Prêt</span>
+                </div>
+            </div>
+            
+            <!-- File Upload Section -->
+            <div class="file-upload-section">
+                <h5 class="mb-3">
+                    <i class="fas fa-upload me-2"></i>
+                    Importer un document Word
+                </h5>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h6>Glissez-déposez votre fichier Word ici</h6>
+                    <p class="text-muted mb-3">ou cliquez pour sélectionner un fichier</p>
+                    <input type="file" id="fileInput" accept=".doc,.docx" style="display: none;">
+                    <small class="text-muted">Formats supportés: .doc, .docx</small>
+                </div>
+            </div>
+            
+            <!-- Editor Content -->
+            <div class="editor-content">
+                <div id="summernote"></div>
+            </div>
+            
+            <!-- Document Actions -->
+            <div class="document-actions">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <button class="btn btn-primary me-2" id="saveBtn">
+                            <i class="fas fa-save me-1"></i>
+                            Enregistrer
+                        </button>
+                        <button class="btn btn-outline-secondary me-2" id="exportBtn">
+                            <i class="fas fa-download me-1"></i>
+                            Exporter
+                        </button>
+                        <button class="btn btn-outline-info" id="printBtn">
+                            <i class="fas fa-print me-1"></i>
+                            Imprimer
+                        </button>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <span class="word-count" id="wordCount">Mots: 0 | Caractères: 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Summernote JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs5.min.js"></script>
+    
+    <!-- Summernote French -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/lang/summernote-fr-FR.min.js"></script>
+    
+    <!-- Mammoth (pour lire les fichiers Word) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Configuration Summernote avec toutes les options
+            $('#summernote').summernote({
+                lang: 'fr-FR',
+                height: 500,
+                minHeight: 300,
+                maxHeight: 800,
+                focus: true,
+                placeholder: 'Commencez à taper votre document ici...',
+                
+                // Barre d'outils complète
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video', 'hr']],
+                    ['view', ['fullscreen', 'codeview', 'help']],
+                    ['mybutton', ['custom']]
+                ],
+                
+                // Styles prédéfinis
+                styleTags: [
+                    'p', 'blockquote', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+                ],
+                
+                // Polices disponibles
+                fontNames: [
+                    'Arial', 'Arial Black', 'Comic Sans MS', 'Courier New',
+                    'Helvetica Neue', 'Helvetica', 'Impact', 'Lucida Grande',
+                    'Tahoma', 'Times New Roman', 'Verdana', 'Calibri', 'Cambria',
+                    'Georgia', 'Segoe UI', 'Trebuchet MS'
+                ],
+                
+                // Tailles de police
+                fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '28', '32', '36', '48', '64', '72'],
+                
+                // Options d'insertion d'images
+                imageAttributes: {
+                    imageShape: {
+                        tooltip: 'Forme de l\'image',
+                        icon: '<i class="fas fa-image"/>',
+                        tags: ['img'],
+                        toggle: false,
+                        dropdown: {
+                            'img-rounded': 'Arrondie',
+                            'img-circle': 'Cercle',
+                            'img-thumbnail': 'Vignette'
+                        }
+                    }
+                },
+                
+                // Callbacks
+                callbacks: {
+                    onInit: function() {
+                        console.log('Summernote initialisé');
+                        updateWordCount();
+                    },
+                    onChange: function(contents, $editable) {
+                        updateWordCount();
+                    },
+                    onImageUpload: function(files) {
+                        uploadImage(files[0]);
+                    }
+                },
+                
+                // Boutons personnalisés
+                buttons: {
+                    custom: function(context) {
+                        var ui = $.summernote.ui;
+                        var button = ui.button({
+                            contents: '<i class="fas fa-magic"></i>',
+                            tooltip: 'Formatage automatique',
+                            click: function() {
+                                autoFormat();
+                            }
+                        });
+                        return button.render();
+                    }
+                }
+            });
+            
+            // Gestion du drag & drop pour les fichiers
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileUpload(e.target.files[0]);
+                }
+            });
+            
+            // Gestion de l'upload de fichiers Word
+            function handleFileUpload(file) {
+                if (!file.name.match(/\.(doc|docx)$/i)) {
+                    alert('Veuillez sélectionner un fichier Word (.doc ou .docx)');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const arrayBuffer = e.target.result;
+                    
+                    // Utiliser Mammoth pour convertir le fichier Word
+                    mammoth.convertToHtml({arrayBuffer: arrayBuffer})
+                        .then(function(result) {
+                            const html = result.value;
+                            $('#summernote').summernote('code', html);
+                            
+                            // Afficher les messages d'erreur s'il y en a
+                            if (result.messages.length > 0) {
+                                console.warn('Messages Mammoth:', result.messages);
+                            }
+                            
+                            alert('Document importé avec succès!');
+                        })
+                        .catch(function(error) {
+                            console.error('Erreur lors de l\'importation:', error);
+                            alert('Erreur lors de l\'importation du document.');
+                        });
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            
+            // Upload d'images
+            function uploadImage(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = $('<img>').attr('src', e.target.result);
+                    $('#summernote').summernote('insertNode', img[0]);
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // Formatage automatique
+            function autoFormat() {
+                let content = $('#summernote').summernote('code');
+                
+                // Corrections automatiques basiques
+                content = content.replace(/\s+/g, ' '); // Espaces multiples
+                content = content.replace(/\s+\./g, '.'); // Espaces avant points
+                content = content.replace(/\s+,/g, ','); // Espaces avant virgules
+                content = content.replace(/([.!?])\s*([A-Z])/g, '$1 $2'); // Espaces après ponctuation
+                
+                $('#summernote').summernote('code', content);
+                alert('Formatage automatique appliqué!');
+            }
+            
+            // Compteur de mots
+            function updateWordCount() {
+                const text = $('#summernote').summernote('code').replace(/<[^>]*>/g, '');
+                const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+                const chars = text.length;
+                
+                $('#wordCount').text(`Mots: ${words} | Caractères: ${chars}`);
+            }
+            
+            // Boutons d'action
+            $('#saveBtn').click(function() {
+                const content = $('#summernote').summernote('code');
+                const blob = new Blob([content], {type: 'text/html'});
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'document.html';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+            
+            $('#exportBtn').click(function() {
+                const content = $('#summernote').summernote('code');
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Export Document</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                            @media print { body { margin: 0; } }
+                        </style>
+                    </head>
+                    <body>
+                        ${content}
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+            });
+            
+            $('#printBtn').click(function() {
+                const content = $('#summernote').summernote('code');
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`<!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Impression</title>
+                            <style>
+                                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                                @media print { body { margin: 20px; } }
+                            </style>
+                        </head>
+                        <body>
+                            ${content}
+                            <script>
+                                window.onload = function() {
+                                    window.print();
+                                    window.close();
+                                }
+                            </script>
+                        </body>
+                        </html>`);
+
+                printWindow.document.close();
+            });
+        });
+    </script>
+</body>
+</html>

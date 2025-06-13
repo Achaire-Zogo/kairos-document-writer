@@ -11,6 +11,16 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Route pour la visionneuse de documents Word
+app.get('/word-viewer', (req, res) => {
+    res.sendFile(path.join(__dirname, 'viewing_doc.html'));
+});
+
+// Route pour la visionneuse de documents Word
+app.get('/word-viewer-sumernote', (req, res) => {
+    res.sendFile(path.join(__dirname, 'viewing_doc_sumernote.html'));
+});
+
 // Upload de fichier
 app.post('/upload', upload.single('file'), (req, res) => {
     const filePath = path.join(__dirname, 'uploads', req.file.originalname);
