@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éditeur de Documents Word</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: none;
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            font-size: 1.5rem;
+            text-align: center;
+            padding: 20px;
+            border-bottom: none;
+        }
+        .card-body {
+            padding: 40px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .features {
+            margin: 30px 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        .feature-item i {
+            margin-right: 10px;
+            color: #6a11cb;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h1>Éditeur de Documents Word</h1>
+                    </div>
+                    <div class="card-body text-center">
+                        <h2 class="mb-4">Modifiez facilement vos documents Word en ligne</h2>
+                        <p class="lead mb-5">Importez, modifiez et exportez vos documents Word avec une interface simple et intuitive.</p>
+                        
+                        <a href="/editor" class="btn btn-primary btn-lg mb-5">
+                            Commencer l'édition
+                        </a>
+                        
+                        <div class="features text-left">
+                            <h4 class="mb-4">Fonctionnalités :</h4>
+                            <div class="feature-item">
+                                <i>✓</i>
+                                <span>Importation de documents Word (.doc, .docx)</span>
+                            </div>
+                            <div class="feature-item">
+                                <i>✓</i>
+                                <span>Édition riche avec mise en forme avancée</span>
+                            </div>
+                            <div class="feature-item">
+                                <i>✓</i>
+                                <span>Exportation en format Word</span>
+                            </div>
+                            <div class="feature-item">
+                                <i>✓</i>
+                                <span>Interface moderne et intuitive</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

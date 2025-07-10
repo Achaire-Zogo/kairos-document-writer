@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CKEditor avec Upload/Sauvegarde DOCX</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-upload {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-upload:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn-save {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            color: white;
+            box-shadow: 0 2px 10px rgba(33, 150, 243, 0.3);
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        /* Conteneur A4 */
+        .document-container {
+            background: #e8e8e8;
+            padding: 40px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            max-width: 794px; /* 210mm en pixels à 96 DPI */
+            margin: 0 auto 20px auto;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-radius: 4px;
+            position: relative;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .page-content {
+            padding: 25.4mm; /* Marges A4 standard (1 pouce) */
+            min-height: calc(297mm - 50.8mm); /* Hauteur - marges haut/bas */
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            color: #000;
+        }
+        
+        .editor-container {
+            border: none;
+            background: transparent;
+        }
+        
+        /* Styles CKEditor pour A4 */
+        .ck-editor__editable {
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            font-family: 'Times New Roman', serif !important;
+            font-size: 12pt !important;
+            line-height: 1.5 !important;
+            min-height: 600px !important;
+            padding: 0 !important;
+        }
+        
+        .ck-editor__main {
+            background: transparent !important;
+        }
+        
+        .ck-toolbar {
+            border-radius: 6px !important;
+            margin-bottom: 20px !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+        }
+        
+        /* Indicateur de page */
+        .page-indicator {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 8px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: 500;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .status.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+        
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #f44336;
+        }
+        
+        .status.info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #2196f3;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .file-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+        
+        .file-info h3 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .file-info p {
+            margin: 4px 0;
+            color: #666;
+            font-size: 13px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .a4-page {
+                width: 95%;
+                max-width: none;
+                min-height: auto;
+            }
+            
+            .page-content {
+                padding: 20px;
+                min-height: 400px;
+            }
+            
+            .document-container {
+                padding: 20px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Éditeur de Documents DOCX</h1>
+        
+        <div class="toolbar">
+            <button class="btn btn-upload" onclick="uploadDocument()">
+                Charger DOCX
+            </button>
+            <button class="btn btn-save" onclick="saveDocument()">
+                Sauvegarder DOCX
+            </button>
+        </div>
+        
+        <input type="file" id="file-input" accept=".docx" onchange="handleFileSelect(event)">
+        
+        <div class="status" id="status"></div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Traitement en cours...</p>
+        </div>
+        
+        <div class="file-info" id="file-info">
+            <h3>Informations du fichier</h3>
+            <p id="file-name"></p>
+            <p id="file-size"></p>
+        </div>
+        
+        <div class="document-container">
+            <div class="a4-page">
+                <div class="page-content">
+                    <div class="editor-container">
+                        <div id="editor"></div>
+                    </div>
+                </div>
+                <div class="page-indicator">Page 1</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor5/35.4.0/ckeditor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script>
+        let editor;
+        let currentFileName = 'document';
+
+        // Initialiser CKEditor
+        ClassicEditor
+            .create(document.querySelector('#editor'), {
+                toolbar: [
+                    'heading', '|',
+                    'bold', 'italic', 'underline', 'strikethrough', '|',
+                    'fontSize', 'fontColor', 'fontBackgroundColor', '|',
+                    'alignment', '|',
+                    'numberedList', 'bulletedList', '|',
+                    'outdent', 'indent', '|',
+                    'link', 'blockQuote', 'insertTable', '|',
+                    'undo', 'redo'
+                ],
+                heading: {
+                    options: [
+                        { model: 'paragraph', title: 'Paragraphe', class: 'ck-heading_paragraph' },
+                        { model: 'heading1', view: 'h1', title: 'Titre 1', class: 'ck-heading_heading1' },
+                        { model: 'heading2', view: 'h2', title: 'Titre 2', class: 'ck-heading_heading2' },
+                        { model: 'heading3', view: 'h3', title: 'Titre 3', class: 'ck-heading_heading3' }
+                    ]
+                },
+                fontSize: {
+                    options: [
+                        9, 10, 11, 12, 'default', 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72
+                    ]
+                },
+                table: {
+                    contentToolbar: [
+                        'tableColumn', 'tableRow', 'mergeTableCells',
+                        'tableCellProperties', 'tableProperties'
+                    ]
+                },
+                language: 'fr'
+            })
+            .then(newEditor => {
+                editor = newEditor;
+                editor.setData('<p>Bienvenue dans votre éditeur de documents DOCX ! Commencez à taper ou chargez un document existant.</p>');
+                showStatus('Éditeur initialisé avec succès !', 'success');
+            })
+            .catch(error => {
+                console.error('Erreur lors de l\'initialisation de CKEditor:', error);
+                showStatus('Erreur lors de l\'initialisation de l\'éditeur', 'error');
+            });
+
+        function uploadDocument() {
+            document.getElementById('file-input').click();
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.docx')) {
+                showStatus('Veuillez sélectionner un fichier DOCX valide', 'error');
+                return;
+            }
+
+            showLoading(true);
+            showFileInfo(file);
+            currentFileName = file.name.replace('.docx', '');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const arrayBuffer = e.target.result;
+                
+                mammoth.convertToHtml({arrayBuffer: arrayBuffer})
+                    .then(function(result) {
+                        editor.setData(result.value);
+                        showLoading(false);
+                        showStatus('Document chargé avec succès !', 'success');
+                        
+                        if (result.messages.length > 0) {
+                            console.log('Messages de conversion:', result.messages);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Erreur lors de la conversion:', error);
+                        showLoading(false);
+                        showStatus('Erreur lors du chargement du document', 'error');
+                    });
+            };
+
+            reader.onerror = function() {
+                showLoading(false);
+                showStatus('Erreur lors de la lecture du fichier', 'error');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function saveDocument() {
+            if (!editor) {
+                showStatus('L\'éditeur n\'est pas encore initialisé', 'error');
+                return;
+            }
+
+            showLoading(true);
+            showStatus('Préparation du document pour la sauvegarde...', 'info');
+
+            try {
+                const content = editor.getData();
+                
+                // Vérifier si docx est disponible
+                if (typeof docx !== 'undefined') {
+                    // Utiliser docx.js pour créer un vrai fichier DOCX
+                    const doc = new docx.Document({
+                        sections: [{
+                            properties: {},
+                            children: [
+                                new docx.Paragraph({
+                                    children: [
+                                        new docx.TextRun({
+                                            text: editor.getText() || 'Document vide',
+                                            font: "Arial",
+                                            size: 24
+                                        })
+                                    ]
+                                })
+                            ]
+                        }]
+                    });
+
+                    docx.Packer.toBlob(doc).then(blob => {
+                        saveAs(blob, `${currentFileName}.docx`);
+                        showLoading(false);
+                        showStatus('Document DOCX sauvegardé avec succès !', 'success');
+                    }).catch(error => {
+                        console.error('Erreur lors de la création DOCX:', error);
+                        fallbackSave(content);
+                    });
+                } else {
+                    // Fallback: sauvegarder en HTML
+                    fallbackSave(content);
+                }
+
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+                showLoading(false);
+                showStatus('Erreur lors de la sauvegarde du document', 'error');
+            }
+        }
+
+        function fallbackSave(content) {
+            // Créer un document HTML complet pour la sauvegarde
+            const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${currentFileName}</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            line-height: 1.6;
+        }
+        h1, h2, h3 { color: #333; }
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            margin: 10px 0;
+        }
+        table, th, td { border: 1px solid #ddd; }
+        th, td { padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    ${content}
+</body>
+</html>`;
+
+            // Créer et télécharger le fichier HTML
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${currentFileName}.html`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+
+            showLoading(false);
+            showStatus('Document sauvegardé en HTML (DOCX non disponible)', 'success');
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showFileInfo(file) {
+            const fileInfoDiv = document.getElementById('file-info');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            
+            fileName.textContent = `Nom: ${file.name}`;
+            fileSize.textContent = `Taille: ${(file.size / 1024).toFixed(2)} KB`;
+            
+            fileInfoDiv.style.display = 'block';
+        }
+
+        // Gestion des raccourcis clavier
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 's') {
+                    e.preventDefault();
+                    saveDocument();
+                } else if (e.key === 'o') {
+                    e.preventDefault();
+                    uploadDocument();
+                }
+            }
+        });
+
+        // Test des bibliothèques au chargement
+        window.addEventListener('load', function() {
+            console.log('=== Test des bibliothèques ===');
+            console.log('CKEditor disponible:', typeof ClassicEditor !== 'undefined');
+            console.log('Mammoth disponible:', typeof mammoth !== 'undefined');
+            console.log('Docx disponible:', typeof docx !== 'undefined');
+            console.log('FileSaver disponible:', typeof saveAs !== 'undefined');
+            
+            if (typeof docx === 'undefined') {
+                console.warn('Bibliothèque docx.js non chargée - utilisation du fallback HTML');
+            }
+        });
+    </script>
+</body>
+</html>

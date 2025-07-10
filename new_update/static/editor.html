@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éditeur de Documents Word</title>
+    <!-- Summernote CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .upload-section {
+            margin-bottom: 40px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            transform: scale(1.1);
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            color: white;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-preview {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            display: none;
+        }
+
+        .export-section {
+            display: none;
+        }
+
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .export-option {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .export-option:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .export-option.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .export-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .export-label {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 600;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .upload-area {
+                padding: 40px 20px;
+            }
+
+            .export-options {
+                grid-template-columns: 1fr;
+            }
+        }
+        .note-editor.note-frame {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .note-editor.note-frame .note-toolbar {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .note-editor.note-frame .note-statusbar {
+            background-color: #f8f9fa;
+        }
+        .file-upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-upload-area:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        .file-upload-area.dragover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #4a5bbf;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="text-align: right; margin-bottom: 20px;">
+                <a href="/" class="btn" style="background: #4CAF50;">Accéder à l'interface</a>
+            </div>
+            <h1>📝 Éditeur de Documents Word</h1>
+            <p>Importez vos documents Word et exportez-les dans différents formats</p>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Cliquez ou glissez votre document Word ici</div>
+                <div class="upload-subtext">Formats supportés: .docx, .doc (Max: 10MB)</div>
+            </div>
+            <p>Importez un document Word, modifiez-le et exportez-le</p>
+        </div>
+        
+        <!-- Zone de dépôt de fichier -->
+        <div class="file-upload-area" id="dropZone">
+            <div class="upload-icon">📄</div>
+            <p>Glissez votre fichier Word ici</p>
+            <p class="small">ou</p>
+            <button class="btn" id="fileInputBtn">Sélectionner un fichier</button>
+            <input type="file" id="fileInput" accept=".docx,.doc" style="display: none;">
+                <button class="btn" id="exportBtn" disabled>Exporter le document</button>
+            </div>
+
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="status" id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        class DocumentProcessor {
+            constructor() {
+                this.initializeEventListeners();
+                this.selectedFormat = 'docx';
+                this.currentFile = null;
+                this.currentContent = '';
+                this.apiUrl = 'http://localhost:5001';
+            }
+
+            initializeEventListeners() {
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+                const exportOptions = document.querySelectorAll('.export-option');
+                const exportBtn = document.getElementById('exportBtn');
+
+                // Upload area events
+                uploadArea.addEventListener('click', () => fileInput.click());
+                uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+                uploadArea.addEventListener('dragleave', this.handleDragLeave.bind(this));
+                uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+
+                // File input change
+                fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+
+                // Export options
+                exportOptions.forEach(option => {
+                    option.addEventListener('click', () => this.selectExportFormat(option));
+                });
+
+                // Export button
+                exportBtn.addEventListener('click', this.exportDocument.bind(this));
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+                document.getElementById('uploadArea').classList.add('dragover');
+            }
+
+            handleDragLeave(e) {
+                e.preventDefault();
+                document.getElementById('uploadArea').classList.remove('dragover');
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                document.getElementById('uploadArea').classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.processFile(files[0]);
+                }
+            }
+
+            async handleFileSelect(e) {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    await this.processFile(files[0]);
+                }
+            }
+
+            async processFile(file) {
+                if (!file) return;
+                
+                // Vérifier le type de fichier
+                if (!file.name.match(/\.(docx?)$/i)) {
+                    this.showStatus('Veuillez sélectionner un fichier Word (.doc ou .docx)', 'error');
+                    return;
+                }
+                
+                // Vérifier la taille du fichier (max 10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    this.showStatus('Le fichier est trop volumineux (max 10MB)', 'error');
+                    return;
+                }
+                
+                this.currentFile = file;
+                this.displayFileInfo(file);
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    
+                    this.showStatus('Traitement du document Word...', 'info');
+                    
+                    const response = await fetch(`${this.apiUrl}/convert-to-html`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la conversion du document');
+                    }
+                    
+                    const result = await response.json();
+                    this.currentContent = result.html;
+                    
+                    // Afficher le contenu dans Summernote
+                    $('#summernote').summernote('code', this.currentContent);
+                    $('#summernote-container').show();
+                    
+                    this.showStatus('Document chargé avec succès', 'success');
+                    
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    this.showStatus('Erreur lors du traitement du document', 'error');
+                }
+            }
+
+            displayFileInfo(file) {
+                const fileInfo = document.getElementById('fileInfo');
+                const fileName = document.getElementById('fileName');
+                const fileSize = document.getElementById('fileSize');
+
+                fileName.textContent = `📄 ${file.name}`;
+                fileSize.textContent = `📊 Taille: ${this.formatFileSize(file.size)}`;
+                fileInfo.style.display = 'block';
+            }
+
+            selectExportFormat(option) {
+                // Remove previous selection
+                document.querySelectorAll('.export-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+
+                // Select new format
+                option.classList.add('selected');
+                this.selectedFormat = option.dataset.format;
+                document.getElementById('exportBtn').disabled = false;
+            }
+
+            async exportDocument() {
+                if (!this.selectedFormat) {
+                    this.showStatus('Veuillez sélectionner un format d\'export', 'error');
+                    return;
+                }
+                
+                if (!this.currentFile) {
+                    this.showStatus('Aucun fichier à exporter', 'error');
+                    return;
+                }
+                
+                this.showStatus('Export en cours...', 'info');
+                
+                try {
+                    // Récupérer le contenu actuel de Summernote
+                    const content = $('#summernote').summernote('code');
+                    
+                    // Préparer les données pour l'export
+                    const exportData = {
+                        html: content,
+                        format: this.selectedFormat,
+                        fileName: this.currentFile.name
+                    };
+                    
+                    // Envoyer la requête d'export
+                    const response = await fetch(`${this.apiUrl}/export-to-word`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(exportData)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de l\'export du document');
+                    }
+                    
+                    // Télécharger le fichier généré
+                    const blob = await response.blob();
+                    const fileName = this.generateFileName(this.selectedFormat);
+                    this.downloadFile(blob, fileName);
+                    
+                    this.showStatus('Export réussi', 'success');
+                } catch (error) {
+                    console.error('Erreur lors de l\'export:', error);
+                    this.showStatus('Erreur lors de l\'export: ' + error.message, 'error');
+                }
+            }
+
+            generateFileName(extension) {
+                if (!this.currentFile) return `document.${extension}`;
+                
+                const originalName = this.currentFile.name;
+                const baseName = originalName.lastIndexOf('.') > 0 
+                    ? originalName.substring(0, originalName.lastIndexOf('.')) 
+                    : originalName;
+                    
+                return `${baseName}_modified.${extension || 'docx'}`;
+            }
+            
+            getMimeType(format) {
+                const types = {
+                    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'doc': 'application/msword',
+                    'pdf': 'application/pdf',
+                    'txt': 'text/plain'
+                };
+                return types[format] || 'application/octet-stream';
+            }
+
+            downloadFile(blob, filename) {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }
+
+            showProgress(show) {
+                const progressBar = document.getElementById('progressBar');
+                const progressFill = document.getElementById('progressFill');
+                
+                if (show) {
+                    progressBar.style.display = 'block';
+                    progressFill.style.width = '100%';
+                } else {
+                    setTimeout(() => {
+                        progressBar.style.display = 'none';
+                        progressFill.style.width = '0%';
+                    }, 1000);
+                }
+            }
+
+            showStatus(message, type) {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = `status ${type}`;
+                status.style.display = 'block';
+
+                if (type === 'success') {
+                    setTimeout(() => {
+                        status.style.display = 'none';
+                    }, 5000);
+                }
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            window.documentProcessor = new DocumentProcessor();
+            
+            // Initialiser Summernote
+            $('#summernote').summernote({
+                height: 400,
+                lang: 'fr-FR',
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ],
+                callbacks: {
+                    onInit: function() {
+                        console.log('Summernote is launched');
+                    },
+                    onChange: function(contents) {
+                        // Mettre à jour le contenu modifié
+                        if (window.documentProcessor) {
+                            window.documentProcessor.currentContent = contents;
+                        }
+                    }
+                }
+            });
+        });
+
+        // jQuery et autres scripts requis
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ajouter jQuery et autres scripts dynamiquement s'ils ne sont pas déjà chargés
+            if (!window.jQuery) {
+                const script1 = document.createElement('script');
+                script1.src = 'https://code.jquery.com/jquery-3.5.1.min.js';
+                script1.integrity = 'sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=';
+                script1.crossOrigin = 'anonymous';
+                
+                const script2 = document.createElement('script');
+                script2.src = 'https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js';
+                
+                const script3 = document.createElement('script');
+                script3.src = 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js';
+                
+                const script4 = document.createElement('script');
+                script4.src = 'https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js';
+                script4.onload = function() {
+                    // Réinitialiser Summernote une fois les scripts chargés
+                    if (window.jQuery && window.jQuery.fn && window.jQuery.fn.summernote) {
+                        $('#summernote').summernote('destroy');
+                        $('#summernote').summernote({
+                            height: 400,
+                            // autres options...
+                        });
+                    }
+                };
+                
+                document.head.appendChild(script1);
+                script1.onload = function() {
+                    document.head.appendChild(script2);
+                    document.head.appendChild(script3);
+                    document.head.appendChild(script4);
+                };
+            }
+        });
+    </script>
+</body>
+</html>

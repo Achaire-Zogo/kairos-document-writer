@@ -213,33 +213,25 @@
         /* Zone d'édition */
         .editor-container {
             flex: 1;
-            padding: 20px;
+            padding: 0;
             overflow: auto;
-            background: #f3f4f6;
+            background: #e5e5e5;
+            position: relative;
         }
 
         .editor-wrapper {
-            max-width: 210mm;
-            margin: 0 auto;
-            background: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-radius: 4px;
-            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            box-shadow: none;
+            border-radius: 0;
+            overflow: visible;
         }
 
-        /* Styles pour CKEditor */
-        .ck-editor__editable {
-            min-height: 297mm !important;
-            padding: 2.5cm 2cm !important;
-            font-family: 'Times New Roman', serif !important;
-            font-size: 12pt !important;
-            line-height: 1.5 !important;
-            border: none !important;
-            border-radius: 0 !important;
-        }
-
-        .ck-toolbar {
-            display: none !important;
+        #editor {
+            width: 100%;
+            height: 100%;
+            background: transparent;
         }
 
         /* Panneau latéral - Style Office */
@@ -396,6 +388,209 @@
                 padding-bottom: 8px;
             }
         }
+
+        /* Styles pour la gestion des pages */
+        .document-pages-container {
+            background: #e5e5e5;
+            padding: 20px;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .document-page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            max-width: 100%;
+            margin: 0 auto 20px auto;
+            padding: 25.4mm;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+            position: relative;
+            page-break-after: always;
+            overflow: hidden;
+        }
+
+        .document-page:last-child {
+            margin-bottom: 0;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 10mm;
+            right: 25.4mm;
+            font-size: 10pt;
+            color: #666;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .page-break {
+            page-break-before: always;
+            border-top: 2px dashed #ccc;
+            margin: 20px 0;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .page-break::before {
+            content: "Saut de page";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Styles pour préserver la mise en forme Word */
+        .word-content {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.15;
+            color: #000;
+        }
+
+        .word-content h1 {
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 12pt 0;
+            color: #000;
+        }
+
+        .word-content h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin: 10pt 0;
+            color: #000;
+        }
+
+        .word-content h3 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin: 8pt 0;
+            color: #000;
+        }
+
+        .word-content p {
+            margin: 6pt 0;
+            text-align: justify;
+        }
+
+        .word-content ul, .word-content ol {
+            margin: 6pt 0 6pt 18pt;
+            padding-left: 0;
+        }
+
+        .word-content li {
+            margin: 3pt 0;
+        }
+
+        .word-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 6pt 0;
+        }
+
+        .word-content table td, .word-content table th {
+            border: 1pt solid #000;
+            padding: 3pt 6pt;
+            text-align: left;
+        }
+
+        .word-content table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        /* Navigation des pages */
+        .page-navigation {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .page-nav-btn {
+            background: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .page-nav-btn:hover {
+            background: #106ebe;
+        }
+
+        .page-nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Zoom controls */
+        .zoom-controls {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .zoom-btn {
+            background: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: background 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: #106ebe;
+        }
+
+        .zoom-level {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            padding: 4px 0;
+        }
     </style>
 </head>
 <body>
@@ -495,10 +690,13 @@
                         <div class="sidebar-section-title">Importer un document</div>
                         <div class="file-upload-area" id="fileUploadArea">
                             <div class="upload-icon">📄</div>
-                            <div class="upload-text">Glissez-déposez un fichier Word</div>
+                            <div class="upload-text">Glissez un fichier Word ici</div>
                             <div class="upload-hint">ou cliquez pour parcourir</div>
-                            <input type="file" class="file-input" id="fileInput" accept=".docx,.doc">
+                            <input type="file" class="file-input" id="fileInput" accept=".docx">
                         </div>
+                        <button id="testPagesBtn" style="width: 100%; margin-top: 10px; padding: 8px; background: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            🧪 Test Pages (Debug)
+                        </button>
                     </div>
                     
                     <div class="sidebar-section">
@@ -582,112 +780,115 @@
 
             async initializeEditor() {
                 try {
-                    this.editor = await ClassicEditor.create(document.querySelector('#editor'), {
-                        toolbar: {
-                            items: [
-                                'exportPdf', 'exportWord', 'uploadImage', 'bold', 'italic', 'underline',
-                                'heading', '|',
-                                'bold', 'italic', 'strikethrough', '|',
-                                'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
-                                'alignment', '|',
-                                'numberedList', 'bulletedList', '|',
-                                'outdent', 'indent', '|',
-                                'todoList', 'link', 'blockQuote', 'insertTable', '|',
-                                'imageUpload', 'mediaEmbed', '|',
-                                'undo', 'redo', '|',
-                                'findAndReplace', 'selectAll', '|',
-                                'specialCharacters', 'horizontalLine', 'pageBreak', '|',
-                                'textPartLanguage', '|',
-                                'sourceEditing'
-                            ],
-                            shouldNotGroupWhenFull: true
-                        },
-                        language: 'fr',
-                        image: {
-                            toolbar: [
-                                'imageTextAlternative', 'imageStyle:inline', 'imageStyle:block', 'imageStyle:side'
-                            ]
-                        },
-                        table: {
-                            contentToolbar: [
-                                'tableColumn', 'tableRow', 'mergeTableCells',
-                                'tableCellProperties', 'tableProperties'
-                            ]
-                        },
-                        licenseKey: '',
-                        placeholder: 'Commencez à taper votre document ici...',
-                        fontSize: {
-                            options: [
-                                9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72
-                            ],
-                            supportAllValues: true
-                        },
-                        fontFamily: {
-                            options: [
-                                'default',
-                                'Arial, Helvetica, sans-serif',
-                                'Courier New, Courier, monospace',
-                                'Georgia, serif',
-                                'Lucida Sans Unicode, Lucida Grande, sans-serif',
-                                'Tahoma, Geneva, sans-serif',
-                                'Times New Roman, Times, serif',
-                                'Trebuchet MS, Helvetica, sans-serif',
-                                'Verdana, Geneva, sans-serif',
-                                'Calibri, sans-serif'
-                            ],
-                            supportAllValues: true
-                        },
-                        heading: {
-                            options: [
-                                { model: 'paragraph', title: 'Paragraphe', class: 'ck-heading_paragraph' },
-                                { model: 'heading1', view: 'h1', title: 'Titre 1', class: 'ck-heading_heading1' },
-                                { model: 'heading2', view: 'h2', title: 'Titre 2', class: 'ck-heading_heading2' },
-                                { model: 'heading3', view: 'h3', title: 'Titre 3', class: 'ck-heading_heading3' },
-                                { model: 'heading4', view: 'h4', title: 'Titre 4', class: 'ck-heading_heading4' },
-                                { model: 'heading5', view: 'h5', title: 'Titre 5', class: 'ck-heading_heading5' },
-                                { model: 'heading6', view: 'h6', title: 'Titre 6', class: 'ck-heading_heading6' }
-                            ]
-                        },
-                        link: {
-                            decorators: {
-                                addTargetToExternalLinks: true,
-                                defaultProtocol: 'https://',
-                                toggleDownloadable: {
-                                    mode: 'manual',
-                                    label: 'Téléchargeable',
-                                    attributes: {
-                                        download: 'file'
+                    // Initialiser l'éditeur seulement si pas de document Word importé
+                    if (!document.getElementById('documentPages')) {
+                        this.editor = await ClassicEditor.create(document.querySelector('#editor'), {
+                            toolbar: {
+                                items: [
+                                    'exportPdf', 'exportWord', 'uploadImage', 'bold', 'italic', 'underline',
+                                    'heading', '|',
+                                    'bold', 'italic', 'strikethrough', '|',
+                                    'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
+                                    'alignment', '|',
+                                    'numberedList', 'bulletedList', '|',
+                                    'outdent', 'indent', '|',
+                                    'todoList', 'link', 'blockQuote', 'insertTable', '|',
+                                    'imageUpload', 'mediaEmbed', '|',
+                                    'undo', 'redo', '|',
+                                    'findAndReplace', 'selectAll', '|',
+                                    'specialCharacters', 'horizontalLine', 'pageBreak', '|',
+                                    'textPartLanguage', '|',
+                                    'sourceEditing'
+                                ],
+                                shouldNotGroupWhenFull: true
+                            },
+                            language: 'fr',
+                            image: {
+                                toolbar: [
+                                    'imageTextAlternative', 'imageStyle:inline', 'imageStyle:block', 'imageStyle:side'
+                                ]
+                            },
+                            table: {
+                                contentToolbar: [
+                                    'tableColumn', 'tableRow', 'mergeTableCells',
+                                    'tableCellProperties', 'tableProperties'
+                                ]
+                            },
+                            licenseKey: '',
+                            placeholder: 'Commencez à taper votre document ici...',
+                            fontSize: {
+                                options: [
+                                    9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72
+                                ],
+                                supportAllValues: true
+                            },
+                            fontFamily: {
+                                options: [
+                                    'default',
+                                    'Arial, Helvetica, sans-serif',
+                                    'Courier New, Courier, monospace',
+                                    'Georgia, serif',
+                                    'Lucida Sans Unicode, Lucida Grande, sans-serif',
+                                    'Tahoma, Geneva, sans-serif',
+                                    'Times New Roman, Times, serif',
+                                    'Trebuchet MS, Helvetica, sans-serif',
+                                    'Verdana, Geneva, sans-serif',
+                                    'Calibri, sans-serif'
+                                ],
+                                supportAllValues: true
+                            },
+                            heading: {
+                                options: [
+                                    { model: 'paragraph', title: 'Paragraphe', class: 'ck-heading_paragraph' },
+                                    { model: 'heading1', view: 'h1', title: 'Titre 1', class: 'ck-heading_heading1' },
+                                    { model: 'heading2', view: 'h2', title: 'Titre 2', class: 'ck-heading_heading2' },
+                                    { model: 'heading3', view: 'h3', title: 'Titre 3', class: 'ck-heading_heading3' },
+                                    { model: 'heading4', view: 'h4', title: 'Titre 4', class: 'ck-heading_heading4' },
+                                    { model: 'heading5', view: 'h5', title: 'Titre 5', class: 'ck-heading_heading5' },
+                                    { model: 'heading6', view: 'h6', title: 'Titre 6', class: 'ck-heading_heading6' }
+                                ]
+                            },
+                            link: {
+                                decorators: {
+                                    addTargetToExternalLinks: true,
+                                    defaultProtocol: 'https://',
+                                    toggleDownloadable: {
+                                        mode: 'manual',
+                                        label: 'Téléchargeable',
+                                        attributes: {
+                                            download: 'file'
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        removePlugins: [
-                            'CKBoxImageEdit',
-                            'CKFinder',
-                            'EasyImage',
-                            'RealTimeCollaborativeComments',
-                            'RealTimeCollaborativeTrackChanges',
-                            'RealTimeCollaborativeRevisionHistory',
-                            'PresenceList',
-                            'Comments',
-                            'TrackChanges',
-                            'TrackChangesData',
-                            'RevisionHistory',
-                            'Pagination',
-                            'WProofreader',
-                            'MathType'
-                        ]
-                    });
+                            },
+                            removePlugins: [
+                                'CKBoxImageEdit',
+                                'CKFinder',
+                                'EasyImage',
+                                'RealTimeCollaborativeComments',
+                                'RealTimeCollaborativeTrackChanges',
+                                'RealTimeCollaborativeRevisionHistory',
+                                'PresenceList',
+                                'Comments',
+                                'TrackChanges',
+                                'TrackChangesData',
+                                'RevisionHistory',
+                                'Pagination',
+                                'WProofreader',
+                                'MathType'
+                            ]
+                        });
 
-                    // Mise à jour des statistiques en temps réel
-                    this.editor.model.document.on('change:data', () => {
-                        this.updateDocumentStats();
-                    });
+                        // Mise à jour des statistiques en temps réel
+                        this.editor.model.document.on('change:data', () => {
+                            this.updateDocumentStats();
+                        });
+                    }
 
                     // Configuration des boutons du ribbon
                     this.setupRibbonButtons();
                     
-                    console.log('Éditeur CKEditor initialisé avec succès');
+                    console.log('Éditeur initialisé avec succès');
                 } catch (error) {
                     console.error('Erreur lors de l\'initialisation de l\'éditeur:', error);
                 }
@@ -768,17 +969,69 @@
 
                 // Contrôles de police
                 document.getElementById('fontSizeSelect').addEventListener('change', (e) => {
-                    this.editor.execute('fontSize', { value: e.target.value + 'pt' });
+                    if (this.editor) {
+                        this.editor.execute('fontSize', { value: e.target.value + 'pt' });
+                    }
                 });
 
                 document.getElementById('fontFamilySelect').addEventListener('change', (e) => {
-                    this.editor.execute('fontFamily', { value: e.target.value });
+                    if (this.editor) {
+                        this.editor.execute('fontFamily', { value: e.target.value });
+                    }
                 });
 
                 // Actions de document
                 document.getElementById('saveBtn').addEventListener('click', () => this.saveDocument());
                 document.getElementById('exportBtn').addEventListener('click', () => this.exportDocument());
                 document.getElementById('printBtn').addEventListener('click', () => this.printDocument());
+                
+                // Upload de fichier
+                const fileInput = document.getElementById('fileInput');
+                const fileUploadArea = document.getElementById('fileUploadArea');
+                
+                if (fileInput) {
+                    fileInput.addEventListener('change', (e) => {
+                        if (e.target.files.length > 0) {
+                            console.log('Fichier sélectionné via input:', e.target.files[0].name);
+                            this.handleFileUpload(e.target.files[0]);
+                        }
+                    });
+                }
+                
+                if (fileUploadArea) {
+                    fileUploadArea.addEventListener('click', () => {
+                        console.log('Clic sur zone upload');
+                        fileInput.click();
+                    });
+                    
+                    fileUploadArea.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        fileUploadArea.classList.add('drag-over');
+                    });
+                    
+                    fileUploadArea.addEventListener('dragleave', () => {
+                        fileUploadArea.classList.remove('drag-over');
+                    });
+                    
+                    fileUploadArea.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        fileUploadArea.classList.remove('drag-over');
+                        
+                        if (e.dataTransfer.files.length > 0) {
+                            console.log('Fichier déposé:', e.dataTransfer.files[0].name);
+                            this.handleFileUpload(e.dataTransfer.files[0]);
+                        }
+                    });
+                }
+                
+                // Bouton de test
+                const testPagesBtn = document.getElementById('testPagesBtn');
+                if (testPagesBtn) {
+                    testPagesBtn.addEventListener('click', () => {
+                        console.log('=== TEST PAGES ===');
+                        this.createTestPages();
+                    });
+                }
             }
 
             setupFileUpload() {
@@ -828,6 +1081,9 @@
             }
 
             async handleFileUpload(file) {
+                console.log('=== DÉBUT IMPORTATION FICHIER ===');
+                console.log('Fichier:', file.name, file.size, 'bytes');
+                
                 if (!file.name.toLowerCase().endsWith('.docx')) {
                     alert('Veuillez sélectionner un fichier .docx');
                     return;
@@ -836,26 +1092,70 @@
                 document.getElementById('documentStatus').textContent = 'Chargement du document...';
                 
                 try {
+                    console.log('Lecture du fichier...');
                     const arrayBuffer = await this.readFileAsArrayBuffer(file);
-                    const result = await mammoth.convertToHtml({ arrayBuffer });
+                    console.log('Fichier lu, taille:', arrayBuffer.byteLength, 'bytes');
                     
-                    // Insérer le contenu dans l'éditeur
-                    this.editor.setData(result.value);
+                    // Configuration avancée de Mammoth pour préserver la mise en forme
+                    const options = {
+                        convertImage: mammoth.images.imgElement(function(image) {
+                            return image.read("base64").then(function(imageBuffer) {
+                                return {
+                                    src: "data:" + image.contentType + ";base64," + imageBuffer
+                                };
+                            });
+                        }),
+                        styleMap: [
+                            "p[style-name='Heading 1'] => h1:fresh",
+                            "p[style-name='Heading 2'] => h2:fresh",
+                            "p[style-name='Heading 3'] => h3:fresh",
+                            "p[style-name='Title'] => h1.title:fresh",
+                            "p[style-name='Subtitle'] => h2.subtitle:fresh",
+                            "r[style-name='Strong'] => strong",
+                            "r[style-name='Emphasis'] => em",
+                            "p[style-name='Quote'] => blockquote > p:fresh",
+                            "p[style-name='Intense Quote'] => blockquote.intense > p:fresh",
+                            "p[style-name='List Paragraph'] => p.list-paragraph",
+                            "table => table.word-table"
+                        ],
+                        includeDefaultStyleMap: true
+                    };
+                    
+                    console.log('Conversion avec Mammoth...');
+                    const result = await mammoth.convertToHtml({ arrayBuffer }, options);
+                    console.log('Conversion terminée, HTML généré:', result.value.length, 'caractères');
+                    console.log('Aperçu HTML:', result.value.substring(0, 500));
+                    
+                    // Traitement du contenu pour créer des pages
+                    console.log('Traitement du contenu...');
+                    const processedContent = this.processWordContent(result.value);
+                    console.log('Contenu traité:', processedContent.length, 'caractères');
+                    
+                    // Créer la structure de pages
+                    console.log('Création des pages...');
+                    this.createDocumentPages(processedContent);
                     
                     // Mettre à jour le titre du document
                     const fileName = file.name.replace('.docx', '');
                     document.getElementById('documentTitle').textContent = fileName;
                     this.currentDocument = fileName;
                     
+                    // Initialiser la navigation des pages
+                    console.log('Initialisation de la navigation...');
+                    this.initializePageNavigation();
+                    
                     // Mettre à jour les statistiques
+                    console.log('Mise à jour des statistiques...');
                     this.updateDocumentStats();
                     
                     document.getElementById('documentStatus').textContent = 'Document chargé avec succès';
+                    console.log('=== IMPORTATION TERMINÉE ===');
                     
                     if (result.messages.length > 0) {
                         console.warn('Avertissements de conversion:', result.messages);
                     }
                 } catch (error) {
+                    console.error('=== ERREUR IMPORTATION ===');
                     console.error('Erreur lors du chargement du fichier:', error);
                     document.getElementById('documentStatus').textContent = 'Erreur lors du chargement';
                     alert('Erreur lors du chargement du fichier. Vérifiez qu\'il s\'agit d\'un fichier Word valide.');
@@ -872,24 +1172,65 @@
             }
 
             updateDocumentStats() {
-                const data = this.editor.getData();
-                const textOnly = data.replace(/<[^>]*>/g, '').trim();
+                let textOnly = '';
+                let data = '';
+                
+                // Vérifier si on est en mode pages personnalisées ou CKEditor
+                const documentPages = document.getElementById('documentPages');
+                if (documentPages) {
+                    // Mode pages personnalisées (document Word importé)
+                    const wordContent = documentPages.querySelectorAll('.word-content');
+                    data = Array.from(wordContent).map(content => content.innerHTML).join('');
+                    textOnly = Array.from(wordContent).map(content => content.textContent || content.innerText).join(' ').trim();
+                } else if (this.editor) {
+                    // Mode CKEditor
+                    data = this.editor.getData();
+                    textOnly = data.replace(/<[^>]*>/g, '').trim();
+                } else {
+                    // Fallback : lire directement depuis l'élément editor
+                    const editorElement = document.getElementById('editor');
+                    if (editorElement) {
+                        data = editorElement.innerHTML;
+                        textOnly = editorElement.textContent || editorElement.innerText || '';
+                        textOnly = textOnly.trim();
+                    }
+                }
                 
                 // Compter les mots
                 const words = textOnly.split(/\s+/).filter(word => word.length > 0);
-                document.getElementById('wordCount').textContent = words.length;
+                const wordCountElement = document.getElementById('wordCount');
+                if (wordCountElement) {
+                    wordCountElement.textContent = words.length;
+                }
                 
                 // Compter les caractères
-                document.getElementById('charCount').textContent = textOnly.length;
+                const charCountElement = document.getElementById('charCount');
+                if (charCountElement) {
+                    charCountElement.textContent = textOnly.length;
+                }
                 
                 // Compter les paragraphes
                 const paragraphs = data.split(/<\/p>|<\/h[1-6]>|<\/div>/).filter(p => p.trim().length > 0);
-                document.getElementById('paragraphCount').textContent = paragraphs.length;
+                const paragraphCountElement = document.getElementById('paragraphCount');
+                if (paragraphCountElement) {
+                    paragraphCountElement.textContent = paragraphs.length;
+                }
                 
-                // Estimation des pages (approximative)
-                const wordsPerPage = 250;
-                const estimatedPages = Math.max(1, Math.ceil(words.length / wordsPerPage));
-                document.getElementById('pageCount').textContent = estimatedPages;
+                // Compter les pages
+                let pageCount = 1;
+                if (documentPages) {
+                    // Si on a des pages personnalisées, compter les vraies pages
+                    pageCount = documentPages.querySelectorAll('.document-page').length;
+                } else {
+                    // Estimation des pages (approximative)
+                    const wordsPerPage = 250;
+                    pageCount = Math.max(1, Math.ceil(words.length / wordsPerPage));
+                }
+                
+                const pageCountElement = document.getElementById('pageCount');
+                if (pageCountElement) {
+                    pageCountElement.textContent = pageCount;
+                }
             }
 
             switchRibbonTab(tabName) {
@@ -1175,8 +1516,8 @@
                 const content = this.editor.getData();
                 const title = this.currentDocument || 'Document sans titre';
                 
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(`
+                // Créer le HTML complet pour l'impression
+                const printHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -1220,9 +1561,291 @@
     ${content}
 </body>
 </html>
-                `);
+                `;
+                
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(printHtml);
                 printWindow.document.close();
                 printWindow.print();
+            }
+            
+            processWordContent(htmlContent) {
+                // Nettoyer et améliorer le HTML
+                let processedContent = htmlContent;
+                
+                // Remplacer les sauts de page
+                processedContent = processedContent.replace(/<w:br\s+w:type="page"[^>]*>/g, '<div class="page-break"></div>');
+                processedContent = processedContent.replace(/page-break-before:\s*always/g, 'page-break-before: always');
+                
+                // Améliorer les styles de paragraphe
+                processedContent = processedContent.replace(/<p([^>]*)>/g, '<p class="word-paragraph"$1>');
+                
+                // Gérer les tableaux
+                processedContent = processedContent.replace(/<table([^>]*)>/g, '<table class="word-table"$1>');
+                
+                // Gérer les listes
+                processedContent = processedContent.replace(/<ul([^>]*)>/g, '<ul class="word-list"$1>');
+                processedContent = processedContent.replace(/<ol([^>]*)>/g, '<ol class="word-list"$1>');
+                
+                return processedContent;
+            }
+
+            createDocumentPages(content) {
+                console.log('Création des pages du document...', content.substring(0, 200));
+                
+                const editorElement = document.querySelector('#editor');
+                if (!editorElement) {
+                    console.error('Élément #editor non trouvé');
+                    return;
+                }
+                
+                // Créer le conteneur de pages
+                const pagesContainer = document.createElement('div');
+                pagesContainer.className = 'document-pages-container';
+                pagesContainer.id = 'documentPages';
+                
+                // Diviser le contenu en pages
+                const pages = this.splitContentIntoPages(content);
+                console.log(`Document divisé en ${pages.length} pages`);
+                
+                if (pages.length === 0) {
+                    // Si pas de contenu, créer une page vide
+                    pages.push('<p>Document vide</p>');
+                }
+                
+                pages.forEach((pageContent, index) => {
+                    const pageElement = document.createElement('div');
+                    pageElement.className = 'document-page';
+                    pageElement.innerHTML = `
+                        <div class="word-content">${pageContent}</div>
+                        <div class="page-number">${index + 1}</div>
+                    `;
+                    pagesContainer.appendChild(pageElement);
+                });
+                
+                // Remplacer le contenu de l'éditeur
+                editorElement.innerHTML = '';
+                editorElement.appendChild(pagesContainer);
+                
+                console.log('Pages créées et ajoutées au DOM');
+                
+                // Ajouter les contrôles de navigation et zoom
+                this.addPageControls();
+                
+                // Stocker le nombre de pages
+                this.totalPages = pages.length;
+                this.currentPage = 1;
+                
+                console.log(`Total de ${this.totalPages} pages créées`);
+            }
+
+            splitContentIntoPages(content) {
+                // Diviser le contenu basé sur les sauts de page explicites
+                let pages = content.split('<div class="page-break"></div>');
+                
+                // Si pas de sauts de page explicites, diviser intelligemment
+                if (pages.length === 1) {
+                    pages = this.intelligentPageSplit(content);
+                }
+                
+                return pages.filter(page => page.trim().length > 0);
+            }
+
+            intelligentPageSplit(content) {
+                const pages = [];
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = content;
+                tempDiv.style.visibility = 'hidden';
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.width = '210mm';
+                tempDiv.style.padding = '25.4mm';
+                tempDiv.style.fontFamily = 'Times New Roman, serif';
+                tempDiv.style.fontSize = '12pt';
+                tempDiv.style.lineHeight = '1.15';
+                
+                document.body.appendChild(tempDiv);
+                
+                const maxPageHeight = 297 - 50.8; // A4 height minus margins in mm
+                const mmToPx = 3.779527559; // Conversion mm to px at 96 DPI
+                const maxHeightPx = maxPageHeight * mmToPx;
+                
+                let currentPageContent = '';
+                let currentHeight = 0;
+                
+                const elements = Array.from(tempDiv.children);
+                
+                elements.forEach(element => {
+                    const elementHeight = element.offsetHeight;
+                    
+                    if (currentHeight + elementHeight > maxHeightPx && currentPageContent.trim()) {
+                        pages.push(currentPageContent);
+                        currentPageContent = element.outerHTML;
+                        currentHeight = elementHeight;
+                    } else {
+                        currentPageContent += element.outerHTML;
+                        currentHeight += elementHeight;
+                    }
+                });
+                
+                if (currentPageContent.trim()) {
+                    pages.push(currentPageContent);
+                }
+                
+                document.body.removeChild(tempDiv);
+                
+                return pages.length > 0 ? pages : [content];
+            }
+
+            addPageControls() {
+                // Supprimer les contrôles existants s'ils existent
+                const existingNav = document.querySelector('.page-navigation');
+                const existingZoom = document.querySelector('.zoom-controls');
+                if (existingNav) existingNav.remove();
+                if (existingZoom) existingZoom.remove();
+                
+                // Ajouter la navigation des pages
+                const pageNav = document.createElement('div');
+                pageNav.className = 'page-navigation';
+                pageNav.innerHTML = `
+                    <button class="page-nav-btn" id="prevPage">‹</button>
+                    <span class="page-info" id="pageInfo">Page 1 sur 1</span>
+                    <button class="page-nav-btn" id="nextPage">›</button>
+                `;
+                
+                // Ajouter les contrôles de zoom
+                const zoomControls = document.createElement('div');
+                zoomControls.className = 'zoom-controls';
+                zoomControls.innerHTML = `
+                    <button class="zoom-btn" id="zoomIn">+</button>
+                    <div class="zoom-level" id="zoomLevel">100%</div>
+                    <button class="zoom-btn" id="zoomOut">-</button>
+                `;
+                
+                document.body.appendChild(pageNav);
+                document.body.appendChild(zoomControls);
+                
+                this.currentZoom = 1.0;
+            }
+
+            initializePageNavigation() {
+                const prevBtn = document.getElementById('prevPage');
+                const nextBtn = document.getElementById('nextPage');
+                const pageInfo = document.getElementById('pageInfo');
+                const zoomInBtn = document.getElementById('zoomIn');
+                const zoomOutBtn = document.getElementById('zoomOut');
+                const zoomLevel = document.getElementById('zoomLevel');
+                
+                if (!prevBtn || !nextBtn) return;
+                
+                // Navigation des pages
+                prevBtn.addEventListener('click', () => {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                        this.scrollToPage(this.currentPage);
+                        this.updatePageInfo();
+                    }
+                });
+                
+                nextBtn.addEventListener('click', () => {
+                    if (this.currentPage < this.totalPages) {
+                        this.currentPage++;
+                        this.scrollToPage(this.currentPage);
+                        this.updatePageInfo();
+                    }
+                });
+                
+                // Contrôles de zoom
+                if (zoomInBtn) {
+                    zoomInBtn.addEventListener('click', () => {
+                        this.currentZoom = Math.min(this.currentZoom + 0.1, 2.0);
+                        this.applyZoom();
+                    });
+                }
+                
+                if (zoomOutBtn) {
+                    zoomOutBtn.addEventListener('click', () => {
+                        this.currentZoom = Math.max(this.currentZoom - 0.1, 0.5);
+                        this.applyZoom();
+                    });
+                }
+                
+                this.updatePageInfo();
+            }
+
+            scrollToPage(pageNumber) {
+                const pages = document.querySelectorAll('.document-page');
+                if (pages[pageNumber - 1]) {
+                    pages[pageNumber - 1].scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }
+            }
+
+            updatePageInfo() {
+                const pageInfo = document.getElementById('pageInfo');
+                const prevBtn = document.getElementById('prevPage');
+                const nextBtn = document.getElementById('nextPage');
+                
+                if (pageInfo) {
+                    pageInfo.textContent = `Page ${this.currentPage} sur ${this.totalPages}`;
+                }
+                
+                if (prevBtn) {
+                    prevBtn.disabled = this.currentPage <= 1;
+                }
+                
+                if (nextBtn) {
+                    nextBtn.disabled = this.currentPage >= this.totalPages;
+                }
+            }
+
+            applyZoom() {
+                const pagesContainer = document.getElementById('documentPages');
+                const zoomLevel = document.getElementById('zoomLevel');
+                
+                if (pagesContainer) {
+                    pagesContainer.style.transform = `scale(${this.currentZoom})`;
+                    pagesContainer.style.transformOrigin = 'top center';
+                }
+                
+                if (zoomLevel) {
+                    zoomLevel.textContent = `${Math.round(this.currentZoom * 100)}%`;
+                }
+            }
+
+            createTestPages() {
+                console.log('Création de pages de test...');
+                
+                // Contenu de test
+                const testContent = `
+                    <h1>Document de Test</h1>
+                    <p>Ceci est un document de test pour vérifier l'affichage des pages.</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                    <h2>Section 2</h2>
+                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+                    <h2>Section 3</h2>
+                    <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+                    <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+                    <p>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur?</p>
+                    <h2>Section 4</h2>
+                    <p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</p>
+                    <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.</p>
+                    <p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.</p>
+                `;
+                
+                // Créer les pages avec le contenu de test
+                this.createDocumentPages(testContent);
+                
+                // Mettre à jour le titre
+                document.getElementById('documentTitle').textContent = 'Document de Test';
+                this.currentDocument = 'Document de Test';
+                
+                // Mettre à jour les statistiques
+                this.updateDocumentStats();
+                
+                console.log('Pages de test créées');
             }
         }
 

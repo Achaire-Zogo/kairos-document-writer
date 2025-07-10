@@ -434,47 +434,54 @@
             $('#exportBtn').click(function() {
                 const content = $('#summernote').summernote('code');
                 const printWindow = window.open('', '_blank');
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Export Document</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-                            @media print { body { margin: 0; } }
-                        </style>
-                    </head>
-                    <body>
-                        ${content}
-                    </body>
-                    </html>
-                `);
+                const exportContent = `<!DOCTYPE html>
+<html>
+<head>
+    <title>Export Document</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        @media print { body { margin: 0; } }
+    </style>
+</head>
+<body>
+    ${content}
+</body>
+</html>`;
+                printWindow.document.write(exportContent);
                 printWindow.document.close();
             });
             
             $('#printBtn').click(function() {
                 const content = $('#summernote').summernote('code');
                 const printWindow = window.open('', '_blank');
-                printWindow.document.write(`<!DOCTYPE html>
-                        <html>
-                        <head>
-                            <title>Impression</title>
-                            <style>
-                                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-                                @media print { body { margin: 20px; } }
-                            </style>
-                        </head>
-                        <body>
-                            ${content}
-                            <script>
-                                window.onload = function() {
-                                    window.print();
-                                    window.close();
-                                }
-                            </script>
-                        </body>
-                        </html>`);
-
+                const printContent = `<!DOCTYPE html>
+<html>
+<head>
+    <title>Impression</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            line-height: 1.6; 
+        }
+        @media print { 
+            body { 
+                margin: 20px; 
+            } 
+        }
+    </style>
+</head>
+<body>
+    ${content}
+    <script>
+        window.onload = function() {
+            window.print();
+            window.close();
+        };
+    </script>
+</body>
+</html>`;
+                printWindow.document.write(printContent);
                 printWindow.document.close();
             });
         });
